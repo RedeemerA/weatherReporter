@@ -22,8 +22,8 @@
             android:layout_width="350dp"
             android:layout_height="wrap_content"
             android:hint="请输入想要查询的城市或城市ID"
-            android:maxLines="1"
             android:imeOptions="actionSearch"
+            android:maxLines="1"
             android:singleLine="true"
             android:textColor="@color/black"
             android:textSize="15sp" />
@@ -53,7 +53,16 @@
         android:textSize="20sp"
         android:text="关注城市列表"
         android:textColor="@color/black"/>
-
+    <TextView
+        android:id="@+id/tv_main_like_refresh"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        app:layout_constraintTop_toBottomOf="@+id/rl_main_search"
+        app:layout_constraintLeft_toRightOf="@+id/tv_main_like_list"
+        android:textSize="20sp"
+        android:layout_marginStart="20dp"
+        android:text="刷新"
+        android:textColor="@color/black"/>
 
     <ListView
         android:id="@+id/lv_main_like_list"

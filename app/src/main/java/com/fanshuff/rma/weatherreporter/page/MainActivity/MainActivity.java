@@ -19,6 +19,7 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 import com.fanshuff.rma.weatherreporter.R;
+import com.fanshuff.rma.weatherreporter.database.DBLikeDao;
 import com.fanshuff.rma.weatherreporter.database.DBdao;
 import com.fanshuff.rma.weatherreporter.database.DatabaseHelper;
 import com.fanshuff.rma.weatherreporter.entity.CityCodeInfo;
@@ -39,7 +40,7 @@ public class MainActivity extends AppCompatActivity {
 
     private ListView mListViewLike, mListViewCityAndProvince;
 
-    private TextView mTextViewSearchButton, mTextViewChangeButton, mTextViewListTitle;
+    private TextView mTextViewSearchButton, mTextViewChangeButton, mTextViewListTitle, mTextViewRefresh;
 
     private EditText mEditTextSearch;
 
@@ -78,6 +79,16 @@ public class MainActivity extends AppCompatActivity {
         };
         mListViewCityAndProvince.setOnItemClickListener(listener);
 
+        AdapterView.OnItemClickListener listener2 = new AdapterView.OnItemClickListener() {
+            @Override
+            public void onItemClick(AdapterView<?> parent, View view, int position, long id) {
+                Intent intent = new Intent(MainActivity.this, WeatherDetailActivity.class);
+                intent.putExtra(SEARCH_CONTENT, LikeListInfo.get(position).getAdcode());
+                startActivity(intent);
+            }
+        };
+        mListViewLike.setOnItemClickListener(listener2);
+
 
         mTextViewSearchButton.setOnClickListener(new View.OnClickListener() {
             @Override
@@ -86,9 +97,10 @@ public class MainActivity extends AppCompatActivity {
                     Toast.makeText(MainActivity.this, "请先输入需要搜索的城市", Toast.LENGTH_SHORT).show();
                 }else{
                     Intent intent = new Intent(MainActivity.this, WeatherDetailActivity.class);
-                    DBdao dBdao = new DBdao(MainActivity.this);
-                    String adcode = dBdao.getAdcode(mEditTextSearch.getText().toString() );
-                    intent.putExtra(SEARCH_CONTENT, adcode);
+//                    DBdao dBdao = new DBdao(MainActivity.this);
+//                    String adcode = dBdao.getAdcode(mEditTextSearch.getText().toString() );
+//                    intent.putExtra(SEARCH_CONTENT, adcode);
+                    intent.putExtra(SEARCH_CONTENT, mEditTextSearch.getText().toString() );
                     startActivity(intent);
                 }
             }
@@ -112,6 +124,17 @@ public class MainActivity extends AppCompatActivity {
             }
         });
 
+        mTextViewRefresh.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                DBLikeDao dbLikeDao = new DBLikeDao(MainActivity.this);
+                LikeListInfo = dbLikeDao.getAllPoints();
+                mainLikeAdapter = new MainCodeListAdapter(LikeListInfo, MainActivity.this);
+                mListViewLike.setAdapter(mainLikeAdapter);
+
+            }
+        });
+
     }
 
     private void initData() {
@@ -122,12 +145,19 @@ public class MainActivity extends AppCompatActivity {
         mainProvinceAdapter = new MainCodeListAdapter(provinceListInfo, MainActivity.this);
         mListViewCityAndProvince.setAdapter(mainProvinceAdapter);
         isProvince = true;
+        currentList = provinceListInfo;
+
+        DBLikeDao dbLikeDao = new DBLikeDao(MainActivity.this);
+        LikeListInfo = dbLikeDao.getAllPoints();
+        mainLikeAdapter = new MainCodeListAdapter(LikeListInfo, MainActivity.this);
+        mListViewLike.setAdapter(mainLikeAdapter);
     }
 
     private void initView() {
         mTextViewChangeButton = findViewById(R.id.tv_main_list_change_button);
         mTextViewSearchButton = findViewById(R.id.tv_main_search);
         mTextViewListTitle = findViewById(R.id.tv_main_city_or_province_list);
+        mTextViewRefresh = findViewById(R.id.tv_main_like_refresh);
 
         mListViewLike = findViewById(R.id.lv_main_like_list);
         mListViewCityAndProvince = findViewById(R.id.lv_main_city_or_province_list);
@@ -148,15 +178,15 @@ public class MainActivity extends AppCompatActivity {
             Sheet sheet = book.getSheet(0);
             // 4
             DBdao dBdao = new DBdao(MainActivity.this);
-
-            if (dBdao.tabbleIsExist(TABLE_NAME)){
-                for (int j = 1; j < sheet.getRows(); j++){
-                    dBdao.addInformation(sheet.getCell(0,j).getContents(), sheet.getCell(1,j).getContents(), sheet.getCell(2,j).getContents());
-                }
-            }else{
-                Toast.makeText(MainActivity.this, "不存在表，ERROR", Toast.LENGTH_SHORT).show();
-
-            }
+//引起卡顿 暂时注释
+//            if (dBdao.tabbleIsExist(TABLE_NAME)){
+//                for (int j = 1; j < sheet.getRows(); j++){
+//                    dBdao.addInformation(sheet.getCell(0,j).getContents(), sheet.getCell(1,j).getContents(), sheet.getCell(2,j).getContents());
+//                }
+//            }else{
+//                Toast.makeText(MainActivity.this, "不存在表，ERROR", Toast.LENGTH_SHORT).show();
+//
+//            }
             for (int j = 1; j < sheet.getRows(); j++){
                 CityCodeInfo cityCodeInfo = new CityCodeInfo();
                 cityCodeInfo.setChineseName(sheet.getCell(0,j).getContents());

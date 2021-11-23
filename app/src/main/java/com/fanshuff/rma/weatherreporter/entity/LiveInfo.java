@@ -2,6 +2,8 @@ package com.fanshuff.rma.weatherreporter.entity;
 
 public class LiveInfo {
 
+    private int id;
+    private String chinesename;
     private String province;
     private String city;
     private String adcode;
@@ -12,7 +14,8 @@ public class LiveInfo {
     private String humidity;
     private String reporttime;
 
-    public LiveInfo(String province, String city, String adcode, String weather, String temperature, String winddirection, String windpower, String humidity, String reporttime) {
+    public LiveInfo(String chinesename, String province, String city, String adcode, String weather, String temperature, String winddirection, String windpower, String humidity, String reporttime) {
+        this.chinesename = chinesename;
         this.province = province;
         this.city = city;
         this.adcode = adcode;
@@ -25,6 +28,22 @@ public class LiveInfo {
     }
 
     public LiveInfo() {
+    }
+
+    public String getChinesename() {
+        return chinesename;
+    }
+
+    public void setChinesename(String chinesename) {
+        this.chinesename = chinesename;
+    }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
     }
 
     public String getProvince() {

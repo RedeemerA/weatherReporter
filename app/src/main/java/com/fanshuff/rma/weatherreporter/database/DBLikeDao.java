@@ -1,6 +1,7 @@
 package com.fanshuff.rma.weatherreporter.database;
 
 import static com.fanshuff.rma.weatherreporter.database.DatabaseHelper.TABLE_NAME;
+import static com.fanshuff.rma.weatherreporter.database.DatabaseHelper.TABLE_NAME_LIKE;
 
 import android.content.ContentValues;
 import android.content.Context;
@@ -12,19 +13,19 @@ import com.fanshuff.rma.weatherreporter.entity.CityCodeInfo;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DBdao {
+public class DBLikeDao {
 
     private DatabaseHelper databaseHelper;
     private  Context context;
     private SQLiteDatabase db ;
 
-    public DBdao(Context context) {
+    public DBLikeDao(Context context) {
         this.context = context;
         databaseHelper = new DatabaseHelper(context);
     }
 
     //添加数据
-    public void addInformation(String chineseName, String adcode, String citycode){
+    public void addInformation(String chineseName, String adcode){
         db = databaseHelper.getWritableDatabase();
         db.beginTransaction();
 
@@ -33,8 +34,7 @@ public class DBdao {
 
         contentValues.put("chinesename", chineseName);
         contentValues.put("adcode", adcode);
-        contentValues.put("citycode", citycode);
-        db.insertOrThrow(TABLE_NAME, null, contentValues);
+        db.insertOrThrow(TABLE_NAME_LIKE, null, contentValues);
 
         db.setTransactionSuccessful();
         db.endTransaction();
@@ -47,14 +47,14 @@ public class DBdao {
         db.beginTransaction();
 
 // delete from Orders where Id = ?
-        db.delete(TABLE_NAME, "id = ?", new String[]{String.valueOf(id)});
+        db.delete(TABLE_NAME_LIKE, "id = ?", new String[]{String.valueOf(id)});
         db.setTransactionSuccessful();
         db.endTransaction();
         db.close();
     }
 
     //修改数据
-    public void modifyInformation(int id, String chineseName, int adcode, int citycode){
+    public void modifyInformation(int id, String chineseName, int adcode){
         db = databaseHelper.getWritableDatabase();
         db.beginTransaction();
 
@@ -63,9 +63,8 @@ public class DBdao {
 
         cv.put("chineseName", chineseName);
         cv.put("adcode", adcode);
-        cv.put("citycode", citycode);
 
-        db.update(TABLE_NAME,
+        db.update(TABLE_NAME_LIKE,
                 cv,
                 "id = ?",
                 new String[]{String.valueOf(id)});
@@ -76,7 +75,7 @@ public class DBdao {
 
     //遍历输出数据库的数列表
     public List<CityCodeInfo> getAllPoints() {
-        String sql = "select * from Citys";
+        String sql = "select * from CityLike";
         SQLiteDatabase db = databaseHelper.getWritableDatabase();
         List<CityCodeInfo> cityCodeList = new ArrayList<>();
         CityCodeInfo cityCodeInfo = null;
@@ -87,15 +86,11 @@ public class DBdao {
                     chineseName = cursor
                     .getColumnIndex("chinesename"),
                     adcode = cursor
-                            .getColumnIndex("adcode"),
-                    citycode = cursor
-                            .getColumnIndex("citycode");
-
+                            .getColumnIndex("adcode");
 
             cityCodeInfo.setId(cursor.getInt(id));
             cityCodeInfo.setChineseName(cursor.getString(chineseName));
             cityCodeInfo.setAdcode(cursor.getString(adcode));
-            cityCodeInfo.setCitycode(cursor.getString(citycode));
             cityCodeList.add(cityCodeInfo);
         }
         return cityCodeList;
@@ -104,16 +99,26 @@ public class DBdao {
     //查找根据其中一个数据，查找同行的另一个
     public String getAdcode(String chinesename){
         //蠢菜代码如下
-        CityCodeInfo cityCodeInfo = new CityCodeInfo();
-        SQLiteDatabase db = databaseHelper.getWritableDatabase();
-        Cursor cursor = db.query(TABLE_NAME,null,"chinesename"+"=?", new String[]{chinesename},null,null,null);
-        int adcode = cursor.getColumnIndex("adcode");
+        List<CityCodeInfo> cityCodeInfoList = getAllPoints();
+        String adcode = null;
+        for (int i = 0; i < cityCodeInfoList.size(); i++){
+            if (cityCodeInfoList.get(i).getChineseName().equals(chinesename)){
+                adcode = cityCodeInfoList.get(i).getAdcode();
+            }
+        }
+        return adcode;
+    }
 
-        cityCodeInfo.setAdcode(String.valueOf(adcode));
-
-        return cityCodeInfo.getAdcode();
-
-
+    //查找根据其中一个数据，查找同行的另一个
+    public int getId(String chinesename){
+        List<CityCodeInfo> cityCodeInfoList = getAllPoints();
+        int id = 0;
+        for (int i = 0; i < cityCodeInfoList.size(); i++){
+            if (cityCodeInfoList.get(i).getChineseName().equals(chinesename)){
+                id = cityCodeInfoList.get(i).getId();
+            }
+        }
+        return id;
     }
 
     public boolean tabbleIsExist(String tableName){
